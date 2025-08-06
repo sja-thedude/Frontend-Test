@@ -21,22 +21,42 @@ const Products = () => {
   };
 
   useEffect(() => {
-    const getProducts = async () => {
-      setLoading(true);
-      const response = await fetch("https://fakestoreapi.com/products/");
-      if (componentMounted) {
-        setData(await response.clone().json());
-        setFilter(await response.json());
-        setLoading(false);
-      }
+  const getProducts = async () => {
+    setLoading(true);
+    const response = await fetch("https://fakestoreapi.com/products/");
+    if (componentMounted) {
+      const apiData = await response.json();
+      
 
-      return () => {
-        componentMounted = false;
+      // 👇 Your custom product
+      const customProduct = {
+        id: 204,
+        title: "SJA Custom Wireless Headphones",
+        description: "High-quality wireless headphones with noise cancellation.",
+        price: 129.99,
+        category: "electronics",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4tldHo-FqDlbdOdD00nKNJMmkF0qvTObHLw&s",
+        rating: { rate: 4.8 },
+        stock: 10,
+        variants: ["Black", "White", "Red"],
       };
-    };
 
-    getProducts();
-  }, []);
+      
+
+      const finalData = [customProduct, ...apiData]; // Add custom product to top
+
+      setData(finalData);
+      setFilter(finalData);
+      setLoading(false);
+    }
+  };
+
+  getProducts();
+
+  return () => {
+    componentMounted = false;
+  };
+}, []);
 
   const Loading = () => {
     return (
@@ -130,10 +150,34 @@ const Products = () => {
                   </p>
                 </div>
                 <ul className="list-group list-group-flush">
-                  <li className="list-group-item lead">$ {product.price}</li>
+  <li className="list-group-item lead">$ {product.price}</li>
+
+  {/* ✅ Variant dropdown if available */}
+  {product.variants && (
+    <li className="list-group-item">
+      <label htmlFor={`variant-${product.id}`} className="form-label">
+        Variant:
+      </label>
+      <select
+        id={`variant-${product.id}`}
+        className="form-select form-select-sm"
+        onChange={(e) =>
+          (product.selectedVariant = e.target.value)
+        }
+        defaultValue={product.variants[0]}
+      >
+        {product.variants.map((variant, idx) => (
+          <option key={idx} value={variant}>
+            {variant}
+          </option>
+        ))}
+      </select>
+    </li>
+  )}
+</ul>
                   {/* <li className="list-group-item">Dapibus ac facilisis in</li>
                     <li className="list-group-item">Vestibulum at eros</li> */}
-                </ul>
+              
                 <div className="card-body">
                   <Link
                     to={"/product/" + product.id}
@@ -142,13 +186,17 @@ const Products = () => {
                     Buy Now
                   </Link>
                   <button
+                    disabled={product.stock === 0}
                     className="btn btn-dark m-1"
                     onClick={() => {
                       toast.success("Added to cart");
-                      addProduct(product);
+                      addProduct({
+                        ...product,
+                        selectedVariant: product.selectedVariant || product.variants?.[0] || "",
+                      });
                     }}
                   >
-                    Add to Cart
+                    {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                   </button>
                 </div>
               </div>

@@ -21,22 +21,51 @@ const Product = () => {
   };
 
   useEffect(() => {
-    const getProduct = async () => {
-      setLoading(true);
-      setLoading2(true);
+  const getProduct = async () => {
+    setLoading(true);
+    setLoading2(true);
+
+    // 👇 Handle your custom product manually
+    if (id === "204") {
+      const customProduct = {
+        id: 204,
+        title: "SJA Custom Wireless Headphones",
+        description: "High-quality wireless headphones with noise cancellation.",
+        price: 129.99,
+        category: "electronics",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4tldHo-FqDlbdOdD00nKNJMmkF0qvTObHLw&s",
+        rating: { rate: 4.8 },
+        stock: 10,
+        variants: ["Black", "White", "Red"],
+      };
+      setProduct(customProduct);
+
+      // Optional: get similar products by category
+      const response2 = await fetch(
+        `https://fakestoreapi.com/products/category/electronics`
+      );
+      const data2 = await response2.json();
+      setSimilarProducts(data2);
+    } else {
+      // Normal API product
       const response = await fetch(`https://fakestoreapi.com/products/${id}`);
       const data = await response.json();
       setProduct(data);
-      setLoading(false);
+
       const response2 = await fetch(
         `https://fakestoreapi.com/products/category/${data.category}`
       );
       const data2 = await response2.json();
       setSimilarProducts(data2);
-      setLoading2(false);
-    };
-    getProduct();
-  }, [id]);
+    }
+
+    setLoading(false);
+    setLoading2(false);
+  };
+
+  getProduct();
+}, [id]);
 
   const Loading = () => {
     return (
@@ -61,6 +90,7 @@ const Product = () => {
     );
   };
 
+  const [selectedVariant, setSelectedVariant] = useState("");
   const ShowProduct = () => {
     return (
       <>
@@ -83,10 +113,34 @@ const Product = () => {
                 <i className="fa fa-star"></i>
               </p>
               <h3 className="display-6  my-4">${product.price}</h3>
+                {product.variants && (
+                  <div className="my-2">
+                    <label htmlFor="variant-select" className="form-label">
+                      Variant:
+                    </label>
+                    <select
+                        id="variant-select"
+                        className="form-select form-select-sm"
+                        value={selectedVariant}
+                        onChange={(e) => setSelectedVariant(e.target.value)}
+                      >
+                        {product.variants.map((variant, idx) => (
+                          <option key={idx} value={variant}>
+                            {variant}
+                          </option>
+                        ))}
+                      </select>
+                  </div>
+                )}
               <p className="lead">{product.description}</p>
               <button
                 className="btn btn-outline-dark"
-                onClick={() => addProduct(product)}
+                onClick={() =>
+                  addProduct({
+                    ...product,
+                    selectedVariant: selectedVariant || product.variants?.[0] || "",
+                  })
+                }
               >
                 Add to Cart
               </button>
@@ -154,10 +208,11 @@ const Product = () => {
                       Buy Now
                     </Link>
                     <button
-                      className="btn btn-dark m-1"
-                      onClick={() => addProduct(item)}
+                      className="btn btn-outline-dark"
+                      disabled={product.stock === 0}
+                      onClick={() => addProduct(product)}
                     >
-                      Add to Cart
+                      {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                     </button>
                   </div>
                 </div>
