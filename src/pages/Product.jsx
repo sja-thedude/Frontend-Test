@@ -25,7 +25,6 @@ const Product = () => {
     setLoading(true);
     setLoading2(true);
 
-    // 👇 Handle your custom product manually
     if (id === "204") {
       const customProduct = {
         id: 204,
@@ -41,14 +40,12 @@ const Product = () => {
       };
       setProduct(customProduct);
 
-      // Optional: get similar products by category
       const response2 = await fetch(
         `https://fakestoreapi.com/products/category/electronics`
       );
       const data2 = await response2.json();
       setSimilarProducts(data2);
     } else {
-      // Normal API product
       const response = await fetch(`https://fakestoreapi.com/products/${id}`);
       const data = await response.json();
       setProduct(data);

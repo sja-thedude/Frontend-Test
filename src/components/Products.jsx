@@ -27,8 +27,6 @@ const Products = () => {
     if (componentMounted) {
       const apiData = await response.json();
       
-
-      // 👇 Your custom product
       const customProduct = {
         id: 204,
         title: "SJA Custom Wireless Headphones",
@@ -43,7 +41,7 @@ const Products = () => {
 
       
 
-      const finalData = [customProduct, ...apiData]; // Add custom product to top
+      const finalData = [customProduct, ...apiData];
 
       setData(finalData);
       setFilter(finalData);
@@ -152,7 +150,6 @@ const Products = () => {
                 <ul className="list-group list-group-flush">
   <li className="list-group-item lead">$ {product.price}</li>
 
-  {/* ✅ Variant dropdown if available */}
   {product.variants && (
     <li className="list-group-item">
       <label htmlFor={`variant-${product.id}`} className="form-label">
